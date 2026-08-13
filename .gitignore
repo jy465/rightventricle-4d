@@ -1,0 +1,16 @@
+# Local Python and Jupyter state
+.venv/
+.venv*/
+.ipynb_checkpoints/
+
+# Patient-derived inputs and generated mesh handoffs stay local.
+*.nii
+*.nii.gz
+outputs/
+
+# Local diagnostic files
+_codex_*_probe.txt
+tmp-codex-write-test.txt
+
+# Accidental nested repository; retained locally and excluded from this repository.
+4D-RightVentricle/

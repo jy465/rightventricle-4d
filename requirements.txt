@@ -1,0 +1,8 @@
+numpy>=1.24
+nibabel>=5.2
+scikit-image>=0.22
+scipy>=1.10
+trimesh>=4.0
+plotly>=5.18
+ipywidgets>=8.1
+jupyterlab>=4.0
