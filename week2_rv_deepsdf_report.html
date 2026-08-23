@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisHeart RV DeepSDF | Week 2 Evidence Report</title>
+  <style>
+    :root { --ink:#18313a; --muted:#567078; --paper:#f7f4ed; --panel:#fffdf8; --line:#d7d1c6; --teal:#087e7f; --teal-pale:#dff3ed; --amber:#a85f00; --amber-pale:#fff0cf; --navy:#153c5a; }
+    * { box-sizing:border-box; } body { margin:0; background:radial-gradient(circle at 8% 0%,#dbeee9 0,transparent 28rem),var(--paper); color:var(--ink); font:16px/1.55 Georgia,"Times New Roman",serif; }
+    main { max-width:1120px; margin:0 auto; padding:42px 24px 64px; } .eyebrow { font:700 12px/1.2 "Trebuchet MS",sans-serif; letter-spacing:.13em; text-transform:uppercase; color:var(--teal); }
+    h1,h2,h3 { font-family:"Trebuchet MS",Verdana,sans-serif; line-height:1.12; margin:0; } h1 { max-width:930px; margin-top:9px; font-size:clamp(2.2rem,5vw,4.2rem); letter-spacing:-.05em; } h2 { font-size:1.45rem; margin-bottom:12px; color:var(--navy); } h3 { font-size:1rem; margin-bottom:6px; }
+    p { margin:0 0 13px; } code,.path { overflow-wrap:anywhere; font:13px/1.4 Consolas,"Courier New",monospace; } .lede { max-width:850px; margin-top:20px; font-size:1.18rem; color:#38545c; }
+    .badge,.status { display:inline-block; border-radius:999px; font:700 12px/1 "Trebuchet MS",sans-serif; } .badge { margin-top:22px; padding:7px 11px; background:var(--teal-pale); color:#075f5f; } .meta,.small { color:var(--muted); font-size:.9rem; }
+    .grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:30px 0 34px; } .card,section { background:color-mix(in srgb,var(--panel) 94%,transparent); border:1px solid var(--line); border-radius:14px; box-shadow:0 7px 22px rgba(23,49,58,.05); } .card { min-height:130px; padding:17px; }
+    .number { display:block; font:700 2rem/1 "Trebuchet MS",sans-serif; color:var(--teal); margin:6px 0; } .label { color:var(--muted); font-size:.85rem; } section { padding:26px; margin:18px 0; } .ok { border-color:#a8d4c8; background:var(--teal-pale); } .warning { border-color:#e7c780; background:var(--amber-pale); }
+    table { width:100%; border-collapse:collapse; margin:14px 0 4px; font-size:.94rem; } th,td { padding:10px 9px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); } th { color:var(--navy); font:700 .78rem/1.2 "Trebuchet MS",sans-serif; letter-spacing:.06em; text-transform:uppercase; } .status { padding:3px 8px; white-space:nowrap; } .pass { color:#075f5f; background:#d7f0e8; } .partial { color:#8d5200; background:#ffebbe; }
+    .steps { counter-reset:step; display:grid; gap:13px; } .step { position:relative; padding-left:48px; } .step:before { counter-increment:step; content:counter(step); position:absolute; left:0; top:0; display:grid; width:30px; height:30px; place-items:center; border-radius:50%; background:var(--teal); color:#fff; font:700 14px/1 "Trebuchet MS",sans-serif; } .two { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    ul,ol { margin:8px 0 0; padding-left:21px; } li { margin:6px 0; } .gallery { display:block; width:100%; margin-top:16px; border:1px solid var(--line); border-radius:9px; background:#fbfaf5; }
+    @media (max-width:800px) { main { padding:28px 15px 44px; } .grid,.two { grid-template-columns:1fr 1fr; } section { padding:20px; } table { display:block; overflow-x:auto; white-space:nowrap; } } @media (max-width:480px) { .grid,.two { grid-template-columns:1fr; } h1 { font-size:2.25rem; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">VisHeart RV 4D Reconstruction / Week 2</div>
+    <h1>RV DeepSDF pilot is trained, decoded, and ready for controlled future integration.</h1>
+    <p class="lede">The final 15-shape RV pilot learns signed inside/outside space in the same coordinate convention used by future VisHeart inference. It produces watertight RV meshes and strictly loads in the existing application decoder. This is a technical pilot, not a clinical or held-out accuracy result.</p>
+    <div class="badge">Current decision: technical integration candidate, not for deployment</div>
+    <p class="meta">Updated 2026-08-23. Production source under <code>E:\Jy\COS40005FYPA</code> was not edited.</p>
+
+    <div class="grid">
+      <div class="card"><div class="label">Independent pilot shapes</div><span class="number">15</span><div class="label">5 each from ACDC, M&amp;Ms, M&amp;Ms-2</div></div>
+      <div class="card"><div class="label">Signed-distance fit</div><span class="number">90.2%</span><div class="label">Mean sign accuracy across all archives</div></div>
+      <div class="card"><div class="label">Final CUDA pilot</div><span class="number">300</span><div class="label">epochs; final loss <code>0.01544</code></div></div>
+      <div class="card"><div class="label">Production decoder load</div><span class="number">PASS</span><div class="label">Strict state-dictionary load, epoch 300</div></div>
+    </div>
+
+    <section class="ok">
+      <h2>What was fixed</h2>
+      <p>The earlier pilots were rejected because their command-line dispatcher silently forced <code>data_load_rv.json</code>, the old coordinate corpus, although RV specs named the corrected corpus. The model was trained on one map and evaluated on another.</p>
+      <p>The standalone trainer now follows each surface's <code>DataSource</code> and logs the chosen manifest. The final run logged <code>Using training manifest: ...data_load_rv_production_lps_v2.json</code>.</p>
+      <p>The corrected corpus preserves original NIfTI bytes, uses SimpleITK LPS geometry and the production <code>get_T</code> transform, and searches the RV field in <code>[-2.25, 2.25]</code>. This bound is based on all 1,716 eligible labels: maximum absolute canonical coordinate <code>2.0426</code>, plus margin.</p>
+    </section>
+
+    <section>
+      <h2>Evidence</h2>
+      <table>
+        <thead><tr><th>Check</th><th>Final result</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Full RV label audit</td><td>ACDC: 300 RV / 299 watertight / 299 pose. M&amp;Ms: 738 / 736 / 728. M&amp;Ms-2: 709 / 707 / 689. Total: 1,716 eligible of 1,747.</td><td><span class="status partial">PASS WITH SKIPS</span></td></tr>
+          <tr><td>Corrected pilot corpus</td><td>15 selected shapes: 15 non-empty RV, 15 watertight, 15 real <code>get_T</code>, 15 coordinate round-trips, 15 independent sign checks, 15 archives written.</td><td><span class="status pass">PASS</span></td></tr>
+          <tr><td>Training-sample SDF check</td><td>Mean clamped SDF MAE <code>0.01320</code>; mean sign accuracy <code>90.20%</code>; lowest frame <code>86.20%</code>.</td><td><span class="status pass">PASS</span></td></tr>
+          <tr><td>Millimetre-space training-shape metric</td><td>15/15 watertight meshes at resolution <code>64</code>: Chamfer RMS <code>1.51 +/- 0.22 mm</code>; Hausdorff <code>5.01 +/- 0.81 mm</code>. This is a training-set technical check, not held-out accuracy.</td><td><span class="status pass">PASS</span></td></tr>
+          <tr><td>Mesh gate</td><td>At resolution <code>96</code> and grid bound <code>2.25</code>, representatives from all three datasets decoded to watertight meshes: 3,286 / 4,154 / 4,106 vertices.</td><td><span class="status pass">PASS</span></td></tr>
+          <tr><td>Production decoder contract</td><td>Final epoch-300 state dictionary loads with <code>strict=True</code> into the actual bundled application decoder.</td><td><span class="status pass">PASS</span></td></tr>
+        </tbody>
+      </table>
+      <img class="gallery" src="file:///E:/Jy/4DMM-upstream/outputs/training/rv-production-lps-v2-pilot-300-final/rv/mesh_validation/final_rv_mesh_gallery.png" alt="Three final RV DeepSDF pilot mesh decodes">
+      <p class="small">The gallery is a technical mesh check only, not a comparison against held-out ground truth.</p>
+    </section>
+
+    <section>
+      <h2>How it works, simply</h2>
+      <div class="steps">
+        <div class="step"><h3>Start with the RV label</h3><p>Each segmentation becomes a closed triangle skin, like a balloon made from tiny triangles.</p></div>
+        <div class="step"><h3>Put every balloon on the same map</h3><p>The existing production <code>get_T</code> transform moves every RV into one common coordinate space, so the model learns anatomy rather than scanner position.</p></div>
+        <div class="step"><h3>Teach inside and outside</h3><p>Points receive a signed distance: negative inside, positive outside, and zero on the wall. DeepSDF learns that numeric field instead of directly memorising triangles.</p></div>
+        <div class="step"><h3>Draw the wall again</h3><p>Marching cubes finds the predicted zero boundary and turns it into a 3D RV mesh. A mesh is accepted only if it is non-empty and watertight.</p></div>
+      </div>
+    </section>
+
+    <section class="ok">
+      <h2>Why it will fit later</h2>
+      <div class="two">
+        <div><h3>Same coordinate convention</h3><p>The final corpus uses original NIfTI geometry, SimpleITK LPS, and read-only production <code>get_T</code>. That removes hidden coordinate drift.</p></div>
+        <div><h3>Same decoder interface</h3><p>The checkpoint has the same parameter layout as the application decoder and passed strict loading. No partial or loose weight load is used.</p></div>
+        <div><h3>RV has its own grid setting</h3><p>The RV model records <code>ReconstructionGridBound = 2.25</code>, so it is not cropped by the legacy <code>[-1,1]</code> reconstruction box.</p></div>
+        <div><h3>No false motion claim</h3><p>This is shape-only at <code>t=0</code>. It does not claim patient-specific RV motion across phases.</p></div>
+      </div>
+    </section>
+
+    <section class="warning">
+      <h2>One small future system change</h2>
+      <p>When the team integrates this approved checkpoint, pass the RV grid bound from model specs into the existing mesh helper: <code>volume_size = 4.5</code> for RV instead of its current default <code>2.0</code>. This changes the search box from <code>[-1,1]</code> to <code>[-2.25,2.25]</code>.</p>
+      <p>This is intentionally deferred. Application code remains untouched today, and the value is already stored with the model for a small reviewable future change.</p>
+    </section>
+
+    <section class="warning">
+      <h2>What to validate next</h2>
+      <ol>
+        <li>Make a patient-level train, validation, and test split. ED and ES from one patient must stay together.</li>
+        <li>Train with all 1,716 eligible shapes, retaining manifest, sign, coordinate round-trip, and mesh gates.</li>
+        <li>Measure held-out Chamfer RMS, Hausdorff distance, volume error, and visually inspect small and large RVs.</li>
+        <li>Review the 31 exclusions separately: 5 non-manifold meshes and 26 NIfTI direction-cosine failures.</li>
+        <li>Only after held-out validation, stage the one grid-bound change behind a configuration flag and run non-training end-to-end tests.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Evidence locations</h2>
+      <p class="path">Notebook: E:\Jy\visheart-rv-4d-notebook\rv_deepsdf_training.ipynb</p>
+      <p class="path">Final manifest: E:\Jy\4DMM-upstream\training_data\data_load_rv_production_lps_v2.json</p>
+      <p class="path">Final checkpoint: E:\Jy\4DMM-upstream\outputs\training\rv-production-lps-v2-pilot-300-final\rv\ModelParameters\latest.pth</p>
+      <p class="path">SDF evidence: E:\Jy\4DMM-upstream\outputs\training\rv-production-lps-v2-pilot-300-final\rv\mesh_validation\training_sample_fit.json</p>
+      <p class="path">Mesh evidence: E:\Jy\4DMM-upstream\outputs\training\rv-production-lps-v2-pilot-300-final\rv\mesh_validation\mesh_summary.json</p>
+      <p class="path">Millimetre metric evidence: E:\Jy\4DMM-upstream\outputs\training\rv-production-lps-v2-pilot-300-final\rv\mesh_validation\pilot_metrics_mm.json</p>
+      <p class="path">Standalone upstream changes: E:\Jy\4DMM-upstream\train_4dmm.py and reconstruct_4dmm.py</p>
+    </section>
+  </main>
+</body>
+</html>

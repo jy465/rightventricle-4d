@@ -70,6 +70,22 @@ The notebook expects the VisHeart labelled-mask convention:
 Patient-derived NIfTI files and generated meshes are ignored by Git and must not be uploaded
 without appropriate approval.
 
+## Week 2 Expert-Label Corpus Status
+
+`rv_deepsdf_training.ipynb` now discovers the local ACDC, M&Ms, and M&Ms-2 expert-label masks through `VISHEART_RV4D_DATA_ROOT`; it does not modify `COS40005FYPA`. Each labelled ED/ES frame is treated as an independent shape with `t = 0.0`, never as a fabricated two-frame motion sequence.
+
+The executed 2026-08-22 pre-SDF audit found `299/300` usable ACDC shapes, `728/738` usable M&Ms shapes, and `689/709` usable M&Ms-2 shapes after RV, watertight-mesh, and `get_T`/canonical-pose gates. All three datasets exposed label values `0, 1, 2, 3`, supporting the shared `RV_LABEL = 1` convention.
+
+SDF sign gates, `.npz` generation, trainer smoke testing, and convergence remain unexecuted. The current notebook Python 3.13 environment cannot install the upstream sampler's pinned renderer dependency. Use a compatible training environment with `pyrender`, PyTorch, and the upstream dependencies, then set `VISHEART_RV4D_BUILD_CORPUS=true`; the notebook will apply `cmesh.contains()` immediately after SDF sampling, warn above `0.5%` mismatch, and reject shapes above `5%`.
+
+### Executed Training Smoke Test (2026-08-23)
+
+A standalone Python 3.11/CUDA environment completed the first RV DeepSDF smoke run. Three expert-labelled shapes, one from each dataset, passed the independent SDF sign gate after in-memory face-normal repair; their archives trained for one epoch on `cuda:0` with a total loss of `0.0358337`. The resulting RV checkpoint loaded into production's `Decoder` using `strict=True`. This demonstrates pipeline and checkpoint compatibility only, not convergence or reconstruction accuracy.
+
+## Future Integration Contract
+
+The RV model will remain separate from production until its checkpoint loads through production's existing `Decoder` with `strict=True`. It must use a dedicated upstream `rv` surface/output path and must never overwrite `endo` or `epi`. The notebook also rejects a handoff until the SDF sign check passes and the world → canonical → world transform residual is at most `1e-5 mm`. No `COS40005FYPA` source change is needed for these gates.
+
 ## Run
 
 ```powershell
