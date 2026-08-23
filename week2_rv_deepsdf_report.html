@@ -22,10 +22,10 @@
 <body>
   <main>
     <div class="eyebrow">VisHeart RV 4D Reconstruction / Week 2</div>
-    <h1>RV DeepSDF pilot is trained, decoded, and ready for controlled future integration.</h1>
-    <p class="lede">The final 15-shape RV pilot learns signed inside/outside space in the same coordinate convention used by future VisHeart inference. It produces watertight RV meshes and strictly loads in the existing application decoder. This is a technical pilot, not a clinical or held-out accuracy result.</p>
+    <h1>RV DeepSDF pilot is trained, decoded, and has a first held-out patient check.</h1>
+    <p class="lede">The final RV pilot learns signed inside/outside space in the same coordinate convention used by future VisHeart inference. It produces watertight RV meshes, strictly loads in the existing application decoder, and has now fitted three completely unseen patients. This is a shape-representation pilot, not MRI-to-segmentation or clinical accuracy.</p>
     <div class="badge">Current decision: technical integration candidate, not for deployment</div>
-    <p class="meta">Updated 2026-08-23. Production source under <code>E:\Jy\COS40005FYPA</code> was not edited.</p>
+    <p class="meta">Updated 2026-08-24. Production source under <code>E:\Jy\COS40005FYPA</code> was not edited.</p>
 
     <div class="grid">
       <div class="card"><div class="label">Independent pilot shapes</div><span class="number">15</span><div class="label">5 each from ACDC, M&amp;Ms, M&amp;Ms-2</div></div>
@@ -50,12 +50,15 @@
           <tr><td>Corrected pilot corpus</td><td>15 selected shapes: 15 non-empty RV, 15 watertight, 15 real <code>get_T</code>, 15 coordinate round-trips, 15 independent sign checks, 15 archives written.</td><td><span class="status pass">PASS</span></td></tr>
           <tr><td>Training-sample SDF check</td><td>Mean clamped SDF MAE <code>0.01320</code>; mean sign accuracy <code>90.20%</code>; lowest frame <code>86.20%</code>.</td><td><span class="status pass">PASS</span></td></tr>
           <tr><td>Millimetre-space training-shape metric</td><td>15/15 watertight meshes at resolution <code>64</code>: Chamfer RMS <code>1.51 +/- 0.22 mm</code>; Hausdorff <code>5.01 +/- 0.81 mm</code>. This is a training-set technical check, not held-out accuracy.</td><td><span class="status pass">PASS</span></td></tr>
+          <tr><td>Held-out patient representation check</td><td>12 train shapes / 3 unseen patients (one per dataset), 300 epochs. New latent code fitted from each expert segmentation SDF: 3/3 predicted meshes watertight; Chamfer RMS <code>2.31 mm</code>; HD95 <code>4.92 mm</code>; sampled Hausdorff <code>11.31 mm</code>.</td><td><span class="status pass">PASS</span></td></tr>
           <tr><td>Mesh gate</td><td>At resolution <code>96</code> and grid bound <code>2.25</code>, representatives from all three datasets decoded to watertight meshes: 3,286 / 4,154 / 4,106 vertices.</td><td><span class="status pass">PASS</span></td></tr>
           <tr><td>Production decoder contract</td><td>Final epoch-300 state dictionary loads with <code>strict=True</code> into the actual bundled application decoder.</td><td><span class="status pass">PASS</span></td></tr>
         </tbody>
       </table>
       <img class="gallery" src="file:///E:/Jy/4DMM-upstream/outputs/training/rv-production-lps-v2-pilot-300-final/rv/mesh_validation/final_rv_mesh_gallery.png" alt="Three final RV DeepSDF pilot mesh decodes">
       <p class="small">The gallery is a technical mesh check only, not a comparison against held-out ground truth.</p>
+      <img class="gallery" src="file:///E:/Jy/4DMM-upstream/outputs/training/rv-production-lps-v2-pilot-heldout-v1-300/rv/heldout_validation/heldout_mesh_comparison_gallery.png" alt="Held-out RV expert and DeepSDF mesh comparisons">
+      <p class="small">Held-out result: the network weights are frozen; only a fresh shape code is fitted from that patient's expert segmentation SDF. This evaluates the learned shape space, not MRI segmentation accuracy.</p>
     </section>
 
     <section>
@@ -87,9 +90,9 @@
     <section class="warning">
       <h2>What to validate next</h2>
       <ol>
-        <li>Make a patient-level train, validation, and test split. ED and ES from one patient must stay together.</li>
+        <li>Scale the completed patient-level pilot split into a full train, validation, and test split. ED and ES from one patient must stay together.</li>
         <li>Train with all 1,716 eligible shapes, retaining manifest, sign, coordinate round-trip, and mesh gates.</li>
-        <li>Measure held-out Chamfer RMS, Hausdorff distance, volume error, and visually inspect small and large RVs.</li>
+        <li>Measure a sufficiently sized held-out set: Chamfer RMS, HD95, volume error, and visual checks for small and large RVs.</li>
         <li>Review the 31 exclusions separately: 5 non-manifold meshes and 26 NIfTI direction-cosine failures.</li>
         <li>Only after held-out validation, stage the one grid-bound change behind a configuration flag and run non-training end-to-end tests.</li>
       </ol>
@@ -103,6 +106,9 @@
       <p class="path">SDF evidence: E:\Jy\4DMM-upstream\outputs\training\rv-production-lps-v2-pilot-300-final\rv\mesh_validation\training_sample_fit.json</p>
       <p class="path">Mesh evidence: E:\Jy\4DMM-upstream\outputs\training\rv-production-lps-v2-pilot-300-final\rv\mesh_validation\mesh_summary.json</p>
       <p class="path">Millimetre metric evidence: E:\Jy\4DMM-upstream\outputs\training\rv-production-lps-v2-pilot-300-final\rv\mesh_validation\pilot_metrics_mm.json</p>
+      <p class="path">Held-out split: E:\Jy\4DMM-upstream\training_data\data_load_rv_production_lps_v2_pilot_patient_split_v1.json</p>
+      <p class="path">Held-out metrics and gallery: E:\Jy\4DMM-upstream\outputs\training\rv-production-lps-v2-pilot-heldout-v1-300\rv\heldout_validation\heldout_metrics.json</p>
+      <p class="path">Held-out evaluator: E:\Jy\4DMM-upstream\evaluate_rv_heldout_pilot.py</p>
       <p class="path">Standalone upstream changes: E:\Jy\4DMM-upstream\train_4dmm.py and reconstruct_4dmm.py</p>
     </section>
   </main>
